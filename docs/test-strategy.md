@@ -22,3 +22,9 @@ Primary organization: `file-tunnel`
 3. Run the same trace against the reference model and implementation.
 4. Retain failing seeds as regression tests.
 5. Link behavior changes to the matching Linear issue and repository PR.
+
+## Paired desktop gate
+
+The desktop adapter is a versioned cross-repository test, not a network-dependent unit test. Offline tests generate synthetic schemas, manifests, and dependency files to exercise negative vectors. CI then checks out immutable commits for `ftnl-interfaces`, `ftnl-desktop-app.rs`, and `ftnl-flutter` and applies the same adapter to production-owned contract artifacts.
+
+The gate fails closed when a source lock uses a mutable ref, either client pins a different interface commit, a manifest omits or reorders a schema feature, evidence violates the schema boundary, or Rust and Flutter report different statuses. Evidence prose may differ because each client owns its implementation details; the feature identifiers and statuses may not.
