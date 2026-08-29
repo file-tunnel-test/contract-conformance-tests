@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
 import random
+import re
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any, Iterable, Mapping
 
 
 class IdempotencyConflict(ValueError):
+    pass
+
+
+class ContractViolation(ValueError):
     pass
 
 
@@ -143,3 +149,81 @@ def replay(commands: Iterable[Command], duplicate_every: int = 0) -> ReferenceSt
         if duplicate_every and index % duplicate_every == 0:
             assert store.apply(command) == first
     return store
+
+
+_CONTRACT_NAMES = frozenset({"tunnel", "events", "proximity", "desktop_companion"})
+_IMPLEMENTATIONS = frozenset({"rust_desktop", "flutter_desktop"})
+_ISSUE_URL = re.compile(
+    r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[0-9]+$"
+)
+
+
+def validate_desktop_parity_record(
+    record: Mapping[str, Any], *, today: datetime.date
+) -> None:
+    if frozenset(record) != {
+        "contract_version",
+        "change_id",
+        "changed_contracts",
+        "implementations",
+    }:
+        raise ContractViolation("desktop parity record fields are not canonical")
+    if record["contract_version"] != 1:
+        raise ContractViolation("desktop parity contract version is unsupported")
+    change_id = record["change_id"]
+    if not isinstance(change_id, str) or not re.fullmatch(r"[A-Za-z0-9._/-]{1,128}", change_id):
+        raise ContractViolation("desktop parity change id is invalid")
+
+    changed = record["changed_contracts"]
+    if (
+        not isinstance(changed, list)
+        or not changed
+        or len(changed) != len(set(changed))
+        or not set(changed) <= _CONTRACT_NAMES
+    ):
+        raise ContractViolation("changed contracts must be unique canonical names")
+
+    implementations = record["implementations"]
+    if not isinstance(implementations, Mapping) or frozenset(implementations) != _IMPLEMENTATIONS:
+        raise ContractViolation("both Rust and Flutter impacts are required")
+    for implementation, impact in implementations.items():
+        _validate_implementation_impact(implementation, impact, today=today)
+
+
+def _validate_implementation_impact(
+    implementation: str, impact: Any, *, today: datetime.date
+) -> None:
+    if not isinstance(impact, Mapping):
+        raise ContractViolation(f"{implementation} impact must be an object")
+    status = impact.get("status")
+    repository = impact.get("repository")
+    if not isinstance(repository, str) or not re.fullmatch(
+        r"[a-z0-9][a-z0-9-]*/[A-Za-z0-9._-]{1,180}", repository
+    ):
+        raise ContractViolation(f"{implementation} repository is invalid")
+
+    if status == "implemented":
+        if frozenset(impact) != {"repository", "status", "evidence"}:
+            raise ContractViolation(f"{implementation} implemented fields are not canonical")
+        evidence = impact["evidence"]
+        if not isinstance(evidence, list) or not evidence or len(evidence) != len(set(evidence)):
+            raise ContractViolation(f"{implementation} needs unique implementation evidence")
+        return
+
+    required = {"repository", "status", "rationale", "review_expires_on"}
+    if status == "blocked":
+        required.add("follow_up_issue")
+    elif status != "not_affected":
+        raise ContractViolation(f"{implementation} status is invalid")
+    if frozenset(impact) != required:
+        raise ContractViolation(f"{implementation} deferred fields are not canonical")
+    if not isinstance(impact["rationale"], str) or len(impact["rationale"]) < 20:
+        raise ContractViolation(f"{implementation} rationale is too short")
+    try:
+        review_expires_on = datetime.date.fromisoformat(impact["review_expires_on"])
+    except (TypeError, ValueError) as error:
+        raise ContractViolation(f"{implementation} review expiry is invalid") from error
+    if review_expires_on < today:
+        raise ContractViolation(f"{implementation} deferred review has expired")
+    if status == "blocked" and not _ISSUE_URL.fullmatch(impact["follow_up_issue"]):
+        raise ContractViolation(f"{implementation} blocker needs a GitHub issue")
