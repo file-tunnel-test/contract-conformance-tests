@@ -36,3 +36,27 @@ jobs:
           PYTHONPATH: src
           DEEP_TEST_SEEDS: '0-49'
         run: python -m unittest discover -s tests -v
+      - name: Check out canonical desktop interface
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: file-tunnel/ftnl-interfaces
+          ref: 9ffa2741d24a94ff4752a035086a207a7d9015ca
+          path: .external/ftnl-interfaces
+          persist-credentials: false
+      - name: Check out Rust desktop implementation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: file-tunnel/ftnl-desktop-app.rs
+          ref: 91156836d913ca59c289a7d9e9d1acc4d8f3331b
+          path: .external/ftnl-desktop-app-rs
+          persist-credentials: false
+      - name: Verify paired desktop contract at immutable revisions
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m deep_tests.desktop_contract \
+            --interfaces .external/ftnl-interfaces \
+            --rust .external/ftnl-desktop-app-rs \
+            --flutter-evidence fixtures/flutter-desktop-evidence.json \
+            --source-lock fixtures/desktop-contract-sources.json \
+            --verify-git-revisions
