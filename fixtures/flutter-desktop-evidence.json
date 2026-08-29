@@ -1,0 +1,70 @@
+{
+  "repository": "file-tunnel/ftnl-flutter",
+  "commit": "9f98f6a50abb5c68bbcfe29c823410db65623713",
+  "interface_commit": "9ffa2741d24a94ff4752a035086a207a7d9015ca",
+  "feature_manifest": {
+    "implementation": "flutter_desktop",
+    "features": [
+      {
+        "feature_id": "clipboard.capture.pause",
+        "status": "implemented",
+        "evidence": ["lib/clipboard_workspace.dart and reducer tests"]
+      },
+      {
+        "feature_id": "clipboard.clear_unpinned",
+        "status": "implemented",
+        "evidence": ["lib/clipboard_workspace.dart and reducer tests"]
+      },
+      {
+        "feature_id": "clipboard.deduplicate",
+        "status": "implemented",
+        "evidence": ["lib/clipboard_workspace.dart and reducer tests"]
+      },
+      {
+        "feature_id": "clipboard.delete",
+        "status": "implemented",
+        "evidence": ["lib/file_tunnel_app.dart widget surface"]
+      },
+      {
+        "feature_id": "clipboard.history.text",
+        "status": "implemented",
+        "evidence": ["lib/file_tunnel_app.dart bounded polling adapter"]
+      },
+      {
+        "feature_id": "clipboard.pin",
+        "status": "implemented",
+        "evidence": ["lib/clipboard_workspace.dart and reducer tests"]
+      },
+      {
+        "feature_id": "clipboard.retention",
+        "status": "implemented",
+        "evidence": ["lib/clipboard_workspace.dart and reducer tests"]
+      },
+      {
+        "feature_id": "clipboard.search",
+        "status": "implemented",
+        "evidence": ["lib/file_tunnel_app.dart widget surface"]
+      },
+      {
+        "feature_id": "desktop.tray.lifecycle",
+        "status": "implemented",
+        "evidence": ["lib/desktop lifecycle controller and host tests"]
+      },
+      {
+        "feature_id": "desktop.window.close_to_tray",
+        "status": "implemented",
+        "evidence": ["lib/desktop lifecycle controller tests"]
+      },
+      {
+        "feature_id": "desktop.window.regular",
+        "status": "implemented",
+        "evidence": ["lib/file_tunnel_app.dart adaptive Material workspace"]
+      },
+      {
+        "feature_id": "privacy.source_exclusions",
+        "status": "implemented",
+        "evidence": ["lib/clipboard_workspace.dart fail-closed policy tests"]
+      }
+    ]
+  }
+}

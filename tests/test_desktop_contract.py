@@ -19,6 +19,7 @@ class DesktopContractTests(unittest.TestCase):
         self.rust = root / "rust"
         self.flutter = root / "flutter"
         self.source_lock = root / "desktop-contract-sources.json"
+        self.flutter_evidence = root / "flutter-desktop-evidence.json"
         for directory in (
             self.interfaces / "schema",
             self.rust / "contracts",
@@ -195,6 +196,39 @@ class DesktopContractTests(unittest.TestCase):
                 self._write_json(self.source_lock, changed)
                 with self.assertRaises(DesktopContractViolation):
                     self._validate()
+
+    def test_versioned_flutter_evidence_matches_source_and_interface_locks(self) -> None:
+        evidence = {
+            "repository": "file-tunnel/ftnl-flutter",
+            "commit": "c" * 40,
+            "interface_commit": self.interface_commit,
+            "feature_manifest": self.flutter_manifest,
+        }
+        self._write_json(self.flutter_evidence, evidence)
+        report = validate_desktop_contract(
+            interfaces_root=self.interfaces,
+            rust_root=self.rust,
+            source_lock_path=self.source_lock,
+            flutter_evidence_path=self.flutter_evidence,
+        )
+        self.assertEqual(report.feature_count, 2)
+
+        for field, value in (
+            ("repository", "other/flutter"),
+            ("commit", "d" * 40),
+            ("interface_commit", "e" * 40),
+        ):
+            with self.subTest(field=field):
+                changed = copy.deepcopy(evidence)
+                changed[field] = value
+                self._write_json(self.flutter_evidence, changed)
+                with self.assertRaises(DesktopContractViolation):
+                    validate_desktop_contract(
+                        interfaces_root=self.interfaces,
+                        rust_root=self.rust,
+                        source_lock_path=self.source_lock,
+                        flutter_evidence_path=self.flutter_evidence,
+                    )
 
     def _validate(self):
         return validate_desktop_contract(

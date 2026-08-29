@@ -38,17 +38,23 @@ def validate_desktop_contract(
     *,
     interfaces_root: Path,
     rust_root: Path,
-    flutter_root: Path,
     source_lock_path: Path,
+    flutter_root: Path | None = None,
+    flutter_evidence_path: Path | None = None,
     verify_git_revisions: bool = False,
 ) -> DesktopContractReport:
+    if (flutter_root is None) == (flutter_evidence_path is None):
+        raise DesktopContractViolation(
+            "provide exactly one Flutter checkout or versioned evidence record"
+        )
     source_lock = _read_json(source_lock_path)
     sources, contract_revision = _validate_source_lock(source_lock)
     roots = {
         "interfaces": interfaces_root,
         "rust_desktop": rust_root,
-        "flutter_desktop": flutter_root,
     }
+    if flutter_root is not None:
+        roots["flutter_desktop"] = flutter_root
     if verify_git_revisions:
         for name, root in roots.items():
             actual = _git_revision(root)
@@ -61,9 +67,14 @@ def validate_desktop_contract(
     schema = _read_json(interfaces_root / "schema/desktop-workspace.schema.json")
     schema_version, implementations, feature_ids = _validate_schema(schema)
     rust_manifest = _read_json(rust_root / "contracts/desktop-feature-manifest.json")
-    flutter_manifest = _read_json(
-        flutter_root / "contracts/desktop-feature-manifest.json"
-    )
+    if flutter_root is not None:
+        flutter_manifest = _read_json(
+            flutter_root / "contracts/desktop-feature-manifest.json"
+        )
+    else:
+        flutter_manifest = _validate_flutter_evidence(
+            _read_json(flutter_evidence_path), sources
+        )
     rust_semantics = _validate_implementation_manifest(
         rust_manifest,
         expected_implementation="rust_desktop",
@@ -83,7 +94,8 @@ def validate_desktop_contract(
 
     interface_commit = sources["interfaces"]["commit"]
     _validate_rust_dependency_pin(rust_root, interface_commit)
-    _validate_flutter_dependency_pin(flutter_root, interface_commit)
+    if flutter_root is not None:
+        _validate_flutter_dependency_pin(flutter_root, interface_commit)
 
     assembled = {
         "document_type": "parity_manifest",
@@ -283,6 +295,30 @@ def _validate_flutter_dependency_pin(root: Path, interface_commit: str) -> None:
         raise DesktopContractViolation("pubspec.lock does not resolve the interface pin")
 
 
+def _validate_flutter_evidence(
+    evidence: Any, sources: Mapping[str, Mapping[str, str]]
+) -> Mapping[str, Any]:
+    if not isinstance(evidence, Mapping):
+        raise DesktopContractViolation("Flutter evidence must be an object")
+    _require_exact_keys(
+        evidence,
+        {"repository", "commit", "interface_commit", "feature_manifest"},
+        "Flutter evidence",
+    )
+    flutter_source = sources["flutter_desktop"]
+    if (
+        evidence["repository"] != flutter_source["repository"]
+        or evidence["commit"] != flutter_source["commit"]
+    ):
+        raise DesktopContractViolation("Flutter evidence does not match its source lock")
+    if evidence["interface_commit"] != sources["interfaces"]["commit"]:
+        raise DesktopContractViolation("Flutter evidence pins a different interface commit")
+    manifest = evidence["feature_manifest"]
+    if not isinstance(manifest, Mapping):
+        raise DesktopContractViolation("Flutter evidence manifest must be an object")
+    return manifest
+
+
 def _yaml_dependency_block(text: str, dependency: str) -> str:
     match = re.search(
         rf"(?ms)^  {re.escape(dependency)}:\s*$.*?(?=^  [A-Za-z0-9_]+:\s*$|\Z)",
@@ -321,15 +357,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--interfaces", required=True, type=Path)
     parser.add_argument("--rust", required=True, type=Path)
-    parser.add_argument("--flutter", required=True, type=Path)
+    flutter_source = parser.add_mutually_exclusive_group(required=True)
+    flutter_source.add_argument("--flutter", type=Path)
+    flutter_source.add_argument("--flutter-evidence", type=Path)
     parser.add_argument("--source-lock", required=True, type=Path)
     parser.add_argument("--verify-git-revisions", action="store_true")
     args = parser.parse_args(argv)
     report = validate_desktop_contract(
         interfaces_root=args.interfaces,
         rust_root=args.rust,
-        flutter_root=args.flutter,
         source_lock_path=args.source_lock,
+        flutter_root=args.flutter,
+        flutter_evidence_path=args.flutter_evidence,
         verify_git_revisions=args.verify_git_revisions,
     )
     print(

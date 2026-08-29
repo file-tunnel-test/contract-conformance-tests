@@ -50,13 +50,6 @@ jobs:
           ref: 7f3abb7c5319418305629d857665c443ae1fdaa5
           path: .external/ftnl-desktop-app-rs
           persist-credentials: false
-      - name: Check out Flutter desktop implementation
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: file-tunnel/ftnl-flutter
-          ref: 9f98f6a50abb5c68bbcfe29c823410db65623713
-          path: .external/ftnl-flutter
-          persist-credentials: false
       - name: Verify paired desktop contract at immutable revisions
         env:
           PYTHONPATH: src
@@ -64,6 +57,6 @@ jobs:
           python -m deep_tests.desktop_contract \
             --interfaces .external/ftnl-interfaces \
             --rust .external/ftnl-desktop-app-rs \
-            --flutter .external/ftnl-flutter \
+            --flutter-evidence fixtures/flutter-desktop-evidence.json \
             --source-lock fixtures/desktop-contract-sources.json \
             --verify-git-revisions
