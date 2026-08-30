@@ -1,11 +1,15 @@
+import copy
+import datetime
 import unittest
 
 from deep_tests.contract_model import (
     Command,
+    ContractViolation,
     IdempotencyConflict,
     ReferenceStore,
     generate_valid_trace,
     replay,
+    validate_desktop_parity_record,
 )
 
 
@@ -43,6 +47,66 @@ class ContractConformanceTests(unittest.TestCase):
         self.assertEqual(first, duplicate)
         self.assertEqual(store.revision, 2)
         self.assertIn('"tombstones":["a"]', store.snapshot())
+
+    def test_desktop_parity_requires_current_evidence_for_both_clients(self) -> None:
+        record = self._parity_record()
+        validate_desktop_parity_record(
+            record,
+            today=datetime.date(2026, 8, 25),
+        )
+        self.assertEqual(
+            set(record["implementations"]),
+            {"rust_desktop", "flutter_desktop"},
+        )
+
+    def test_desktop_parity_rejects_missing_or_unknown_implementations(self) -> None:
+        for implementations in (
+            {"rust_desktop": self._parity_record()["implementations"]["rust_desktop"]},
+            self._parity_record()["implementations"] | {"web_desktop": {}},
+        ):
+            record = self._parity_record() | {"implementations": implementations}
+            with self.subTest(implementations=set(implementations)), self.assertRaises(
+                ContractViolation
+            ):
+                validate_desktop_parity_record(record, today=datetime.date(2026, 8, 25))
+
+    def test_desktop_parity_deferred_decisions_expire_and_need_issues(self) -> None:
+        expired = copy.deepcopy(self._parity_record())
+        expired["implementations"]["flutter_desktop"]["review_expires_on"] = "2026-08-24"
+        missing_issue = copy.deepcopy(self._parity_record())
+        del missing_issue["implementations"]["flutter_desktop"]["follow_up_issue"]
+        for record in (expired, missing_issue):
+            with self.assertRaises(ContractViolation):
+                validate_desktop_parity_record(record, today=datetime.date(2026, 8, 25))
+
+    def test_desktop_parity_implemented_status_needs_unique_evidence(self) -> None:
+        for evidence in ([], ["test:one", "test:one"]):
+            record = self._parity_record()
+            record["implementations"]["rust_desktop"]["evidence"] = evidence
+            with self.subTest(evidence=evidence), self.assertRaises(ContractViolation):
+                validate_desktop_parity_record(record, today=datetime.date(2026, 8, 25))
+
+    @staticmethod
+    def _parity_record() -> dict:
+        return {
+            "contract_version": 1,
+            "change_id": "proximity-v1",
+            "changed_contracts": ["proximity", "desktop_companion"],
+            "implementations": {
+                "rust_desktop": {
+                    "repository": "file-tunnel/ftnl-desktop-app.rs",
+                    "status": "implemented",
+                    "evidence": ["test:descriptor-validation"],
+                },
+                "flutter_desktop": {
+                    "repository": "file-tunnel/ftnl-flutter",
+                    "status": "blocked",
+                    "rationale": "The companion repository does not exist yet.",
+                    "follow_up_issue": "https://github.com/file-tunnel/.github/issues/11",
+                    "review_expires_on": "2026-09-30",
+                },
+            },
+        }
 
 
 if __name__ == "__main__":

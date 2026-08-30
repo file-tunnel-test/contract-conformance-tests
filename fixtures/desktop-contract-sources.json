@@ -1,0 +1,17 @@
+{
+  "contract_revision": "DEN-3384.v1",
+  "sources": {
+    "interfaces": {
+      "repository": "file-tunnel/ftnl-interfaces",
+      "commit": "9ffa2741d24a94ff4752a035086a207a7d9015ca"
+    },
+    "rust_desktop": {
+      "repository": "file-tunnel/ftnl-desktop-app.rs",
+      "commit": "91156836d913ca59c289a7d9e9d1acc4d8f3331b"
+    },
+    "flutter_desktop": {
+      "repository": "file-tunnel/ftnl-flutter",
+      "commit": "9f98f6a50abb5c68bbcfe29c823410db65623713"
+    }
+  }
+}
