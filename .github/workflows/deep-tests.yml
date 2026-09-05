@@ -78,7 +78,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: file-tunnel/ftnl-desktop-app.rs
-          ref: 91156836d913ca59c289a7d9e9d1acc4d8f3331b
+          ref: fb6dc13a848b2a33d638a6ea3c83ac68ba06d96e
           path: .external/ftnl-desktop-app-rs
           persist-credentials: false
       - name: Verify paired desktop contract at immutable revisions
