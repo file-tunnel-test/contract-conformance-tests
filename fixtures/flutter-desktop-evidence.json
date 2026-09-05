@@ -1,7 +1,7 @@
 {
   "repository": "file-tunnel/ftnl-flutter",
-  "commit": "ecbcf762e7a1e736e2293a43ddd6ced30e3497f3",
-  "interface_commit": "9ffa2741d24a94ff4752a035086a207a7d9015ca",
+  "commit": "f7d606b6526944976ab686a70991c0a38a36a477",
+  "interface_commit": "bd1c7cb0b014c94fba75ea61b8cc9c0c36b03362",
   "feature_manifest": {
     "implementation": "flutter_desktop",
     "features": [
@@ -64,6 +64,11 @@
         "feature_id": "privacy.source_exclusions",
         "status": "implemented",
         "evidence": ["lib/clipboard_workspace.dart fail-closed policy tests"]
+      },
+      {
+        "feature_id": "proximity.secure_session",
+        "status": "implemented",
+        "evidence": ["lib/secure_bluetooth.dart and secure_bluetooth_test.dart"]
       }
     ]
   }

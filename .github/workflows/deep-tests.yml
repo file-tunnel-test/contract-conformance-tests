@@ -71,14 +71,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: file-tunnel/ftnl-interfaces
-          ref: 9ffa2741d24a94ff4752a035086a207a7d9015ca
+          ref: bd1c7cb0b014c94fba75ea61b8cc9c0c36b03362
           path: .external/ftnl-interfaces
           persist-credentials: false
       - name: Check out Rust desktop implementation
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: file-tunnel/ftnl-desktop-app.rs
-          ref: fb6dc13a848b2a33d638a6ea3c83ac68ba06d96e
+          ref: 708d466b32153a301e3fec399002f46c6a62abb9
           path: .external/ftnl-desktop-app-rs
           persist-credentials: false
       - name: Verify paired desktop contract at immutable revisions
