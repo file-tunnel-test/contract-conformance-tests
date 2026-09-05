@@ -14,9 +14,12 @@ required = {
     "pyproject.toml",
     ".zpkg.toml",
     "docs/test-strategy.md",
+    "fixtures/worker-contract-source.json",
     "scripts/verify_repository.py",
     ".github/workflows/deep-tests.yml",
     "src/deep_tests/__init__.py",
+    "src/deep_tests/worker_contract.py",
+    "tests/test_worker_contract.py",
 }
 missing = sorted(path for path in required if not (ROOT / path).exists())
 if missing:

@@ -1,0 +1,7 @@
+{
+  "contract_revision": "DEN-3384.worker.v1",
+  "source": {
+    "commit": "574fa514a0c19064cb816ffc64037c714e38f0b4",
+    "repository": "file-tunnel/ftnl-interfaces"
+  }
+}
