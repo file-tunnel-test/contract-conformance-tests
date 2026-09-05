@@ -31,4 +31,18 @@ Pass `--verify-git-revisions` when each checkout is at the exact revision in the
 
 For a credential-free verification using the reviewed private-repository evidence, replace `--flutter /path/to/ftnl-flutter` with `--flutter-evidence fixtures/flutter-desktop-evidence.json`.
 
+## Private worker contract
+
+The worker gate independently consumes an immutable public `ftnl-interfaces` revision. It requires exact semantic agreement between the server-scope JSON Schema and TypeSpec authorities, verifies every generated-target digest in the parity receipt, keeps server models out of browser and edge exports, checks stable Protobuf field numbers and machine-readable constraints, and compiles the Protobuf descriptor. It never checks out the private worker implementation and therefore needs no product credential.
+
+```bash
+PYTHONPATH=src python -m deep_tests.worker_contract \
+  --interfaces /path/to/ftnl-interfaces \
+  --source-lock fixtures/worker-contract-source.json \
+  --verify-git-revision \
+  --require-protoc
+```
+
+The deterministic unit suite also rejects remote URLs, inline payloads, path-shaped object handles, unknown operations or fields, oversized work, non-canonical digests, mutable source references, and authority constraint drift.
+
 Tracking: https://github.com/ORESoftware/ai-agent-coordinator.rs/issues/139
