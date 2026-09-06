@@ -1,7 +1,7 @@
 {
   "repository": "file-tunnel/ftnl-flutter",
-  "commit": "f7d606b6526944976ab686a70991c0a38a36a477",
-  "interface_commit": "bd1c7cb0b014c94fba75ea61b8cc9c0c36b03362",
+  "commit": "556c3a874b63270f8f6b979cc0ffbe1a2d96c1e2",
+  "interface_commit": "edf0793da185f05cd844ecbea3edad26c112bd3a",
   "feature_manifest": {
     "implementation": "flutter_desktop",
     "features": [
@@ -24,6 +24,11 @@
         "feature_id": "clipboard.delete",
         "status": "implemented",
         "evidence": ["lib/file_tunnel_app.dart widget surface"]
+      },
+      {
+        "feature_id": "clipboard.history.encrypted_snapshot",
+        "status": "implemented",
+        "evidence": ["lib/workspace_snapshot.dart and workspace_snapshot_test.dart"]
       },
       {
         "feature_id": "clipboard.history.text",
