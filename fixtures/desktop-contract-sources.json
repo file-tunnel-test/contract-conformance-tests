@@ -3,15 +3,15 @@
   "sources": {
     "interfaces": {
       "repository": "file-tunnel/ftnl-interfaces",
-      "commit": "bd1c7cb0b014c94fba75ea61b8cc9c0c36b03362"
+      "commit": "edf0793da185f05cd844ecbea3edad26c112bd3a"
     },
     "rust_desktop": {
       "repository": "file-tunnel/ftnl-desktop-app.rs",
-      "commit": "708d466b32153a301e3fec399002f46c6a62abb9"
+      "commit": "b387ff3cd87dfa87dae447cda57f6be8494c5bb4"
     },
     "flutter_desktop": {
       "repository": "file-tunnel/ftnl-flutter",
-      "commit": "f7d606b6526944976ab686a70991c0a38a36a477"
+      "commit": "556c3a874b63270f8f6b979cc0ffbe1a2d96c1e2"
     }
   }
 }
