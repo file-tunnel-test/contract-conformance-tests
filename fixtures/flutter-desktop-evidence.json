@@ -1,6 +1,6 @@
 {
   "repository": "file-tunnel/ftnl-flutter",
-  "commit": "556c3a874b63270f8f6b979cc0ffbe1a2d96c1e2",
+  "commit": "42bb6f4d7ff0e671fd6ea219a7db7f9161735588",
   "interface_commit": "edf0793da185f05cd844ecbea3edad26c112bd3a",
   "feature_manifest": {
     "implementation": "flutter_desktop",
