@@ -7,11 +7,11 @@
     },
     "rust_desktop": {
       "repository": "file-tunnel/ftnl-desktop-app.rs",
-      "commit": "b387ff3cd87dfa87dae447cda57f6be8494c5bb4"
+      "commit": "0e51b186bdf3960ea34f18a07a21475e205b5e70"
     },
     "flutter_desktop": {
       "repository": "file-tunnel/ftnl-flutter",
-      "commit": "556c3a874b63270f8f6b979cc0ffbe1a2d96c1e2"
+      "commit": "42bb6f4d7ff0e671fd6ea219a7db7f9161735588"
     }
   }
 }
