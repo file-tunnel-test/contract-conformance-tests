@@ -16,6 +16,7 @@ tmp/worktrees/
 tmp/
 temp/
 # Repository-local temporary data and authorized Git worktrees
-tmp
-temp
 temp/worktrees
+
+# machine-local symlink to ORESoftware/my-ai AGENTS.md; never committed
+.ores/
